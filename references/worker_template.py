@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
-"""Reference worker. External agents should match this shape."""
+"""Reference grokkit worker. External agents should match this shape."""
 from __future__ import annotations
 
 import json
 import sys
 
 MANIFEST = {
+    "verified_at": "2026-09-27",
+    "verified_grok_bot": "0.61.0",
     "ok": True,
     "id": "worker-template",
     "title": "Reference worker (replace)",
-    "source": "other",
+    "source": "grok-4.7-high",
+    "origin": {"grok_build": "1.0.41", "os": "windows-11"},
     "priority": 90,
     "keywords": ["template"],
     "default_action": "collect",

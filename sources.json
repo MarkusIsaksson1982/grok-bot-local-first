@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "current_grok_bot": "0.61.0",
+  "note": "0.61.0 is the Grok Bot version verified on Windows on 2026-09-27. On macOS or Linux, ask the user for the installed Grok Bot version and set this field to that value, then use the same value on every worker stamp.",
+  "sources": [
+    {
+      "id": "local",
+      "where": "this kit",
+      "arrive": "lib/",
+      "status": "active",
+      "role": "shipped_workers"
+    },
+    {
+      "id": "other",
+      "where": "external draft",
+      "arrive": "drop/",
+      "status": "active",
+      "role": "candidate"
+    }
+  ]
+}

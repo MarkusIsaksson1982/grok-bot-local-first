@@ -1,0 +1,379 @@
+{
+  "policy": {
+    "quiet_if_inbox_empty": true,
+    "notes": "Spend a Grok Bot turn only when use_bot is true, alert is true, or ok is false.",
+    "setup_doc": "references/setup.md"
+  },
+  "tasks": [
+    {
+      "id": "version-gate",
+      "title": "Compare lib worker verified_grok_bot stamps to current",
+      "priority": 50,
+      "kind": "recorded",
+      "enabled": true,
+      "source": "grok-4.7-high",
+      "keywords": [
+        "version",
+        "stamp",
+        "verified_grok_bot",
+        "iterate",
+        "freshness",
+        "archive"
+      ],
+      "local": {
+        "script": "lib/version-gate.py",
+        "default_action": "check",
+        "source": "grok-4.7-high"
+      },
+      "bot_when": [
+        "fail",
+        "alert"
+      ],
+      "bot_never": [
+        "ok"
+      ],
+      "notes": "shipped in lib/"
+    },
+    {
+      "id": "freshness-gate",
+      "title": "Timestamp / staleness detector for watched inputs",
+      "priority": 55,
+      "kind": "recorded",
+      "enabled": true,
+      "source": "grok-4.7-high",
+      "keywords": [
+        "freshness",
+        "staleness",
+        "timestamp",
+        "age",
+        "mtime",
+        "archive"
+      ],
+      "local": {
+        "script": "lib/freshness-gate.py",
+        "default_action": "check",
+        "source": "grok-4.7-high"
+      },
+      "bot_when": [
+        "fail",
+        "alert"
+      ],
+      "bot_never": [
+        "ok"
+      ],
+      "notes": "shipped in lib/"
+    },
+    {
+      "id": "artifact-pd",
+      "title": "PD fitness + keep/harvest/archive/helper/worker for drop artifacts",
+      "priority": 58,
+      "kind": "recorded",
+      "enabled": true,
+      "source": "grok-4.7-high",
+      "keywords": [
+        "artifact",
+        "progressive-disclosure",
+        "handoff",
+        "helper",
+        "worker-candidate",
+        "harvest",
+        "archive",
+        "markdown",
+        "json",
+        "yaml",
+        "powershell",
+        "diff"
+      ],
+      "local": {
+        "script": "lib/artifact-pd.py",
+        "default_action": "scan",
+        "source": "grok-4.7-high"
+      },
+      "bot_when": [
+        "fail",
+        "alert"
+      ],
+      "bot_never": [
+        "ok"
+      ],
+      "notes": "shipped in lib/"
+    },
+    {
+      "id": "artifact-gate",
+      "title": "Expected-deliverable existence and property checks",
+      "priority": 60,
+      "kind": "recorded",
+      "enabled": true,
+      "source": "grok-4.7-high",
+      "keywords": [
+        "artifact",
+        "deliverable",
+        "existence",
+        "verification",
+        "build"
+      ],
+      "local": {
+        "script": "lib/artifact-gate.py",
+        "default_action": "verify",
+        "source": "grok-4.7-high"
+      },
+      "bot_when": [
+        "fail",
+        "alert"
+      ],
+      "bot_never": [
+        "ok"
+      ],
+      "notes": "shipped in lib/"
+    },
+    {
+      "id": "audit-harness",
+      "title": "Harness auditor",
+      "priority": 65,
+      "kind": "recorded",
+      "enabled": true,
+      "source": "grok-4.7-high",
+      "keywords": [
+        "audit",
+        "contract",
+        "validate"
+      ],
+      "local": {
+        "script": "lib/audit-harness.py",
+        "default_action": "validate",
+        "source": "grok-4.7-high"
+      },
+      "bot_when": [
+        "fail",
+        "alert"
+      ],
+      "bot_never": [
+        "ok"
+      ],
+      "notes": "shipped in lib/"
+    },
+    {
+      "id": "context-budget",
+      "title": "Context Budget Estimator",
+      "priority": 85,
+      "kind": "recorded",
+      "enabled": true,
+      "source": "grok-4.7-high",
+      "keywords": [
+        "context",
+        "budget",
+        "triage",
+        "tokens"
+      ],
+      "local": {
+        "script": "lib/context-budget.py",
+        "default_action": "collect",
+        "source": "grok-4.7-high"
+      },
+      "bot_when": [
+        "fail",
+        "alert"
+      ],
+      "bot_never": [
+        "ok"
+      ],
+      "notes": "shipped in lib/"
+    },
+    {
+      "id": "decision-gate",
+      "title": "Threshold/escalation gate: whether the bot should engage at all",
+      "priority": 85,
+      "kind": "recorded",
+      "enabled": true,
+      "source": "grok-4.7-high",
+      "keywords": [
+        "gate",
+        "threshold",
+        "escalation",
+        "prefilter",
+        "priority"
+      ],
+      "local": {
+        "script": "lib/decision-gate.py",
+        "default_action": "gate",
+        "source": "grok-4.7-high"
+      },
+      "bot_when": [
+        "fail",
+        "alert"
+      ],
+      "bot_never": [
+        "ok"
+      ],
+      "notes": "shipped in lib/"
+    },
+    {
+      "id": "worker-lint",
+      "title": "Worker Contract Linter",
+      "priority": 88,
+      "kind": "recorded",
+      "enabled": true,
+      "source": "grok-4.7-high",
+      "keywords": [
+        "contract",
+        "lint",
+        "validation",
+        "meta"
+      ],
+      "local": {
+        "script": "lib/worker-lint.py",
+        "default_action": "collect",
+        "source": "grok-4.7-high"
+      },
+      "bot_when": [
+        "fail",
+        "alert"
+      ],
+      "bot_never": [
+        "ok"
+      ],
+      "notes": "shipped in lib/"
+    },
+    {
+      "id": "schema-guard",
+      "title": "Local Schema / Contract Guard",
+      "priority": 90,
+      "kind": "recorded",
+      "enabled": true,
+      "source": "grok-4.7-high",
+      "keywords": [
+        "validation",
+        "schema",
+        "contract",
+        "quality"
+      ],
+      "local": {
+        "script": "lib/schema-guard.py",
+        "default_action": "collect",
+        "source": "grok-4.7-high"
+      },
+      "bot_when": [
+        "fail",
+        "alert"
+      ],
+      "bot_never": [
+        "ok"
+      ],
+      "notes": "shipped in lib/"
+    },
+    {
+      "id": "worker-index",
+      "title": "Sibling Worker Manifest Index",
+      "priority": 92,
+      "kind": "recorded",
+      "enabled": true,
+      "source": "grok-4.7-high",
+      "keywords": [
+        "discovery",
+        "index",
+        "cache",
+        "meta"
+      ],
+      "local": {
+        "script": "lib/worker-index.py",
+        "default_action": "collect",
+        "source": "grok-4.7-high"
+      },
+      "bot_when": [
+        "fail",
+        "alert"
+      ],
+      "bot_never": [
+        "ok"
+      ],
+      "notes": "shipped in lib/"
+    },
+    {
+      "id": "review-pack",
+      "title": "Progressive Evidence Pack Builder",
+      "priority": 93,
+      "kind": "recorded",
+      "enabled": true,
+      "source": "grok-4.7-high",
+      "keywords": [
+        "progressive",
+        "evidence",
+        "review",
+        "pack"
+      ],
+      "local": {
+        "script": "lib/review-pack.py",
+        "default_action": "d1",
+        "source": "grok-4.7-high"
+      },
+      "bot_when": [
+        "fail",
+        "alert"
+      ],
+      "bot_never": [
+        "ok"
+      ],
+      "notes": "shipped in lib/"
+    },
+    {
+      "id": "drop-triage",
+      "title": "Drop Folder Triage Meta-Worker",
+      "priority": 95,
+      "kind": "recorded",
+      "enabled": true,
+      "source": "grok-4.7-high",
+      "keywords": [
+        "meta",
+        "drop",
+        "intake",
+        "triage",
+        "compose",
+        "orchestration",
+        "ingest",
+        "version-gate",
+        "disclosure",
+        "asset"
+      ],
+      "local": {
+        "script": "lib/drop-triage.py",
+        "default_action": "d1",
+        "source": "grok-4.7-high"
+      },
+      "bot_when": [
+        "fail",
+        "alert"
+      ],
+      "bot_never": [
+        "ok"
+      ],
+      "notes": "shipped in lib/"
+    },
+    {
+      "id": "secrets-scan",
+      "title": "Secret Pattern Scanner",
+      "priority": 98,
+      "kind": "recorded",
+      "enabled": true,
+      "source": "grok-4.7-high",
+      "keywords": [
+        "security",
+        "secrets",
+        "redaction",
+        "safety"
+      ],
+      "local": {
+        "script": "lib/secrets-scan.py",
+        "default_action": "collect",
+        "source": "grok-4.7-high"
+      },
+      "bot_when": [
+        "fail",
+        "alert"
+      ],
+      "bot_never": [
+        "ok"
+      ],
+      "notes": "shipped in lib/"
+    }
+  ]
+}
