@@ -16,8 +16,8 @@ MANIFEST = {
     "priority": 90,
     "keywords": ["validation", "schema", "contract", "quality"],
     "default_action": "collect",
-    "verified_grok_bot": "0.61.0",
-    "verified_at": "2026-09-27",
+    "verified_grok_bot": "0.58.0",
+    "verified_at": "2026-10-02",
     "actions": [
         {"name": "collect", "use_bot": False, "summary": "Light-check known registry JSON shapes"},
         {"name": "violations", "use_bot": False, "summary": "First shape violations with file + issue"},

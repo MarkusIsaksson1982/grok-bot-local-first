@@ -19,8 +19,8 @@ SOURCE = "grok-4.7-high"
 ID = "audit-harness"
 
 MANIFEST = {
-    "verified_at": "2026-09-27",
-    "verified_grok_bot": "0.61.0",
+    "verified_at": "2026-10-02",
+    "verified_grok_bot": "0.58.0",
     "ok": True,
     "id": ID,
     "title": "Harness auditor",

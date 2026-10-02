@@ -1,21 +1,15 @@
 {
-  "version": 1,
-  "current_grok_bot": "0.61.0",
-  "note": "0.61.0 is the Grok Bot version verified on Windows on 2026-09-27. On macOS or Linux, ask the user for the installed Grok Bot version and set this field to that value, then use the same value on every worker stamp.",
+  "version": 2,
+  "current_grok_bot": "0.58.0",
+  "note": "0.58.0 is the Grok Bot version verified on Linux on 2026-10-02 (0.61.0 was verified on Windows 11 on 2026-09-27). Set this to the Grok Bot version installed where the kit runs, and stamp the same value on every worker.",
+  "platforms_verified": {"linux": "0.58.0", "windows-11": "0.61.0"},
+  "audience_tags": ["common", "bot", "agent"],
   "sources": [
-    {
-      "id": "local",
-      "where": "this kit",
-      "arrive": "lib/",
-      "status": "active",
-      "role": "shipped_workers"
-    },
-    {
-      "id": "other",
-      "where": "external draft",
-      "arrive": "drop/",
-      "status": "active",
-      "role": "candidate"
-    }
+    {"id": "local", "where": "this kit", "arrive": "lib/", "status": "active", "role": "shipped_workers"},
+    {"id": "other", "where": "external draft", "arrive": "drop/", "status": "active", "role": "candidate"},
+    {"id": "web-chat-openai", "kind": "web_chat", "provider": "OpenAI (ChatGPT)", "arrive": "drop/returns/", "status": "active", "role": "external_return", "format": "return-v1", "audience": "common", "prompt": "prompts/providers/openai-chat.md"},
+    {"id": "web-chat-anthropic", "kind": "web_chat", "provider": "Anthropic (Claude)", "arrive": "drop/returns/", "status": "active", "role": "external_return", "format": "return-v1", "audience": "common", "prompt": "prompts/providers/anthropic-chat.md"},
+    {"id": "web-chat-xai", "kind": "web_chat", "provider": "xAI (Grok web)", "arrive": "drop/returns/", "status": "active", "role": "external_return", "format": "return-v1", "audience": "common", "prompt": "prompts/providers/xai-chat.md"},
+    {"id": "coding-agent", "kind": "agent", "provider": "any CLI/IDE coding agent", "arrive": "drop/ (workers) or drop/returns/ (returns)", "status": "active", "role": "worker_or_return", "format": "worker or return-v1", "audience": "agent", "prompt": "prompts/providers/coding-agent.md"}
   ]
 }

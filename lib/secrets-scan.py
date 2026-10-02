@@ -17,8 +17,8 @@ MANIFEST = {
     "priority": 98,
     "keywords": ["security", "secrets", "redaction", "safety"],
     "default_action": "collect",
-    "verified_grok_bot": "0.61.0",
-    "verified_at": "2026-09-27",
+    "verified_grok_bot": "0.58.0",
+    "verified_at": "2026-10-02",
     "actions": [
         {"name": "collect", "use_bot": False, "summary": "Count likely secret hits by type"},
         {"name": "locate", "use_bot": False, "summary": "Safe locations + redaction needs, no values"},

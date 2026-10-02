@@ -3,16 +3,18 @@ name: grok-bot-local-first
 description: >-
   Use when a Grok Bot should spend a turn only on judgment. grokkit.py runs
   one local worker action and prints last-line JSON. Ships a flat lib/ of
-  stdlib workers.
-compatibility: Python 3.12 stdlib; offline; Grok Bot 0.61.0 verified on Windows 11; paths are pathlib-based.
+  stdlib workers and a returns path for non-code answers from external models.
+compatibility: Python 3.12+ stdlib; offline; cross-platform (Linux core, Windows adapter); Grok Bot 0.58.0 verified on Linux, 0.61.0 on Windows 11; paths are pathlib-based.
 metadata:
-  version: "0.2.1"
+  version: "0.3.0"
   grok_build: "1.0.41"
-  os: windows-11
+  os: cross-platform
+  verified_on: [linux, windows-11]
 when_to_use: >-
   Setting up a fresh Grok Bot on this folder, routing a live request to a
-  local worker, or grouping lib/ into sections for the user's own work.
-tags: grok-bot, local-first, cli-worker, lib
+  local worker, ingesting a non-code return from an external model, or
+  grouping lib/ into sections for the user's own work.
+tags: grok-bot, local-first, cli-worker, lib, ingestion
 ---
 
 # Grok Bot local-first
@@ -21,7 +23,7 @@ Grok Bot turns are expensive. Scripts are cheap. Deterministic work stays in `li
 
 ## Point a new bot here
 
-Copy this folder onto the machine that will run the bot, then follow `references/setup.md`. That note creates `state/` and `drop/`, records Grok Bot `0.61.0` as the Windows-verified version, and describes optional library sections. The first bot from this kit on a machine can also use `references/first-probe.md`. Later bots skip that.
+Copy this folder onto the machine that will run the bot, then follow `references/setup.md`. That note creates `state/` and `drop/`, explains the `current_grok_bot` stamp (`0.58.0` Linux-verified), and describes optional library sections. Platform setup scripts are in `adapters/linux/` and `adapters/windows/`. The first bot from this kit on a machine can also use `references/first-probe.md`. Later bots skip that.
 
 Suggested description:
 
@@ -52,7 +54,10 @@ python grokkit.py inbox
 python grokkit.py route <text>
 python grokkit.py action <id> <action>
 python grokkit.py ingest <path>
+python grokkit.py returns ingest|list|extract|lint ...
 ```
+
+On Linux/macOS use `python3` if `python` is not on PATH.
 
 `action` runs the worker registered for that id. Ids and default actions are in `LIBRARY_INVENTORY.md`.
 
@@ -66,13 +71,17 @@ python worker.py --list-actions
 python worker.py --action NAME
 ```
 
-`--manifest` includes `ok`, `id`, `title`, `source`, `priority`, `keywords`, `default_action`, and `actions[]` with `{name, use_bot, summary}`. `source` is `grok-4.7-high`. `origin.grok_build` is `1.0.41` (Grok Build 1.0.41) and `origin.os` is `windows-11` (Windows 11). `origin` records where the worker was last iterated. It is not a required target platform. An externally sourced worker may use another `grok_build` value, such as `opencode`.
+`--manifest` includes `ok`, `id`, `title`, `source`, `priority`, `keywords`, `default_action`, and `actions[]` with `{name, use_bot, summary}`. `source` is `grok-4.7-high`. Shipped workers carry `origin.grok_build` `1.0.41` and `origin.os` `windows-11` from their last iteration; `ret-lint` carries `origin.os` `linux`. `origin` records where the worker was last iterated. It is not a required target platform. An externally sourced worker may use another `grok_build` value, such as `opencode`.
 
 `--action` prints `{ok, alert, summary, data, action}`. Keep `summary` short. Keep `data` small. Cap lists and include a total when truncated.
 
 `use_bot: false` means the action is deterministic. `use_bot: true` means a judgment pack. Do not open a pack unless a person or the inbox asked for it.
 
 The reference shape is `references/worker_template.py`. Copy it to a new name under `drop/` when writing a worker. It is not a live task. Stamp `verified_grok_bot` with the same value as `sources.json` `current_grok_bot`.
+
+## Returns (non-code answers)
+
+Answers from external models or workers (web chats, coding agents) use the return-v1 format in `prompts/common.md`: a `# RETURN v1` header with provenance, then `## [ID] Title` sections within a line budget. Save the reply in `drop/returns/`, then `returns ingest <file> --source <id> --model <label>`. It is linted by `ret-lint`, archived under `state/returns/` with source, model, date and sha256, and indexed. Read only what you need with `returns extract <ret-id> <SECTION>`. Source ids and per-provider notes: `sources.json`, `prompts/providers/`.
 
 ## Library
 
