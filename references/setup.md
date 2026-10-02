@@ -4,9 +4,9 @@ Do this on the machine that will run the bot, after you have read `SKILL.md`. `s
 
 ## Place the kit
 
-Copy this folder to a path you control. The folder can be named `grokkit`. On Windows, `%USERPROFILE%\grokkit` is a typical path. Python 3.12 or newer must be available as `python`.
+Copy this folder to a path you control. The folder can be named `grokkit`. On Linux, `~/grokkit` is a typical path; on Windows, `%USERPROFILE%\grokkit`. Python 3.12 or newer is required (`python3` on Linux/macOS, `python` or `py` on Windows).
 
-Workers use `pathlib`. Forward slashes in commands work on Windows. This kit was run on Windows. It was not run on macOS or Linux.
+Workers use `pathlib`. Forward slashes in commands work on every platform. 0.3.0 is developed and tested on Linux; 0.2.1 was run on Windows 11. `adapters/linux/setup.sh` or `adapters/windows/setup.ps1` does the folder step below and a smoke check.
 
 ## Create the local folders
 
@@ -14,6 +14,7 @@ Next to `grokkit.py`:
 
 - `state/` holds `last.json`, `inbox.json`, and `log.jsonl`. The runner creates the files when you use `inbox` or `action`. Creating the directory first is enough.
 - `drop/` holds incoming files that are not library workers yet.
+- `drop/returns/` holds non-code answers from external models (return-v1, see `prompts/common.md`). `returns ingest` archives them under `state/returns/`.
 - `drop/_archive` is optional. `freshness-gate` treats a path as an archive only when it is under `drop/_archive`. A directory that merely has "archive" in its name is not an archive.
 
 ## First bot on this machine
@@ -31,9 +32,9 @@ python grokkit.py inbox
 
 ## Version stamp
 
-`sources.json` field `current_grok_bot` is `0.61.0`. That number is the Grok Bot version verified on Windows on 2026-09-27. Worker manifests use the same `verified_grok_bot` value. `version-gate` compares those stamps to `sources.json`.
+`sources.json` field `current_grok_bot` is `0.58.0`, the Grok Bot version verified on Linux on 2026-10-02. On Windows 11, 0.2.1 was verified with `0.61.0`. Worker manifests use the same `verified_grok_bot` value. `version-gate` compares those stamps to `sources.json`.
 
-If this kit is installed on macOS or Linux, the installed Grok Bot version may differ from `0.61.0`. Consider whether to leave the version-related workers unused (`version-gate` and `drop-triage`), or make an internal note that version numbering on a non-Windows platform may differ. The practical fix is to ask the user for the Grok Bot version they are running, then write that same value in `sources.json` `current_grok_bot` and in every worker's `verified_grok_bot`.
+Grok Bot version numbers can differ per platform. Ask the user for the version they run, write it in `sources.json` `current_grok_bot`, then restamp with `python grokkit.py action version-gate stamp`.
 
 ## Optional library sections
 

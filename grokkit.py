@@ -14,9 +14,16 @@ Usage:
   python grokkit.py action <id> <action> [worker flags...]
   python grokkit.py ingest <path> [--source <source-id>] [--overwrite]
   python grokkit.py route <live request text>
+  python grokkit.py returns ingest <path> [--source <id>] [--model <label>] [--date YYYY-MM-DD]
+  python grokkit.py returns list [--limit N]
+  python grokkit.py returns extract <ret-id> <section-id>
+  python grokkit.py returns lint <path>
+
+On Linux/macOS use python3 if python is not on PATH.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import shutil
@@ -58,6 +65,9 @@ def lib_dest_for(src_name: str, lane: str | None = None) -> Path:
     return dest_dir / src_name
 
 DROP_DIR = ROOT / "drop"
+RETURNS_DIR = STATE_DIR / "returns"
+RETURNS_INDEX = RETURNS_DIR / "index.jsonl"
+RET_LINT = LIB_DIR / "ret-lint.py"
 
 # Re-ingest keeps these when they are already on the row. --overwrite puts the template back.
 _OPERATOR_FIELDS = ("enabled", "notes", "priority", "kind", "bot_when", "bot_never")
@@ -373,7 +383,7 @@ def cmd_route(cfg: dict, text: str) -> dict:
             "summary": "Run local task %s action %s instead of spending a Grok Bot loop." % (task["id"], action),
             "matched": task["id"],
             "hits": hits,
-            "run": ["python", str(ROOT / "grokkit.py"), "action", task["id"], action],
+            "run": [sys.executable, str(ROOT / "grokkit.py"), "action", task["id"], action],
         }
     use, reason = needs_bot(task, last_for(load_last(), task["id"]))
     return {
@@ -472,7 +482,7 @@ def cmd_ingest(cfg: dict, raw_path: str, source: str | None, overwrite: bool = F
         "local_actions": local_actions,
         "bot_actions": bot_actions,
         "summary": "Ingested %s. Run local_actions only unless inbox/alert says otherwise." % task_id,
-        "run_default": ["python", str(ROOT / "grokkit.py"), "action", task_id, default],
+        "run_default": [sys.executable, str(ROOT / "grokkit.py"), "action", task_id, default],
     }
 
 
@@ -567,6 +577,174 @@ def cmd_last_run(cfg: dict, last: dict, min_days: float = 7.0, max_span_days: fl
     }
 
 
+# ---------------------------------------------------------------------------
+# returns: non-code answers from external models/workers (schemas/return-v1.json)
+# ---------------------------------------------------------------------------
+
+def _source_ids() -> list[str]:
+    data = load_sources()
+    return [str(r.get("id")) for r in (data.get("sources") or []) if isinstance(r, dict) and r.get("id")]
+
+
+def _ret_lint_path() -> Path | None:
+    if RET_LINT.exists():
+        return RET_LINT
+    hits = sorted(LIB_DIR.glob("*/ret-lint.py"))
+    return hits[0] if hits else None
+
+
+def _ret_lint(args: list[str]) -> dict:
+    path = _ret_lint_path()
+    if path is None:
+        return {"ok": False, "alert": True, "summary": "lib/ret-lint.py missing", "data": {}}
+    return run_script(path, args)
+
+
+def _read_index() -> list[dict]:
+    if not RETURNS_INDEX.exists():
+        return []
+    rows = []
+    for ln in RETURNS_INDEX.read_text(encoding="utf-8").splitlines():
+        try:
+            rows.append(json.loads(ln))
+        except json.JSONDecodeError:
+            continue
+    return rows
+
+
+def _slug(text: str) -> str:
+    out = "".join(ch.lower() if ch.isalnum() else "-" for ch in text).strip("-")
+    while "--" in out:
+        out = out.replace("--", "-")
+    return out[:40] or "x"
+
+
+def cmd_returns_ingest(raw_path: str, source: str | None, model: str | None, date: str | None) -> dict:
+    src = Path(raw_path)
+    if not src.is_absolute():
+        src = (Path.cwd() / src) if (Path.cwd() / src).exists() else (ROOT / src)
+    src = src.resolve()
+    if not src.exists():
+        return {"ok": False, "use_bot": False, "reason": "missing_file", "path": str(src)}
+    lint = _ret_lint(["--action", "check", "--file", str(src)])
+    data = lint.get("data") or {}
+    if not lint.get("ok"):
+        return {
+            "ok": False, "alert": True, "use_bot": False, "reason": "return_lint_failed",
+            "summary": lint.get("summary"), "errors": data.get("errors") or [],
+            "hint": "Re-ask the source with prompts/common.md, or fix the file, then ingest again.",
+        }
+    header = data.get("header") or {}
+    source = source or header.get("source")
+    model = model or header.get("model")
+    date = date or header.get("date") or datetime.now().strftime("%Y-%m-%d")
+    if not source or not model:
+        return {"ok": False, "alert": True, "use_bot": False, "reason": "missing_provenance",
+                "summary": "Need source and model (header or --source/--model).", "have": {"source": source, "model": model}}
+    known = _source_ids()
+    if source not in known:
+        return {"ok": False, "alert": True, "use_bot": False, "reason": "unknown_source", "source": source, "known": known}
+    if len(date) != 10 or date[4] != "-" or date[7] != "-" or parse_iso(date + "T00:00:00") is None:
+        return {"ok": False, "alert": True, "use_bot": False, "reason": "bad_date", "date": date}
+    raw = src.read_bytes()
+    sha = hashlib.sha256(raw.replace(b"\r\n", b"\n")).hexdigest()
+    ids = [s.get("id") for s in data.get("sections") or []]
+    for row in _read_index():
+        if row.get("sha256") == sha:
+            return {"ok": True, "use_bot": False, "duplicate": True, "ret_id": row.get("ret_id"),
+                    "sections": row.get("sections"), "summary": "Already ingested as %s." % row.get("ret_id")}
+    ret_id = "%s-%s-%s" % (date, _slug(source), sha[:8])
+    dest = RETURNS_DIR / date / (ret_id + ".md")
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_bytes(raw)
+    row = {
+        "ret_id": ret_id,
+        "source": source,
+        "model": model,
+        "date": date,
+        "ask": header.get("ask"),
+        "audience": header.get("audience"),
+        "sha256": sha,
+        "sections": ids,
+        "lines": data.get("lines"),
+        "budget": data.get("budget"),
+        "from": src.name,
+        "archive": str(dest.relative_to(ROOT)).replace("\\", "/"),
+        "ingested_at": _now(),
+    }
+    with RETURNS_INDEX.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(row, ensure_ascii=True) + "\n")
+    return {
+        "ok": True,
+        "use_bot": False,
+        "duplicate": False,
+        "ret_id": ret_id,
+        "source": source,
+        "model": model,
+        "date": date,
+        "sections": ids,
+        "lines": data.get("lines"),
+        "warnings": (data.get("warnings") or [])[:6],
+        "archive": row["archive"],
+        "summary": "Archived %s (%d section(s)). Extract only the sections you need." % (ret_id, len(ids)),
+        "extract": [sys.executable, str(ROOT / "grokkit.py"), "returns", "extract", ret_id, "<section-id>"],
+    }
+
+
+def cmd_returns_list(limit: int = 12) -> dict:
+    rows = _read_index()
+    tail = rows[-limit:] if limit > 0 else rows
+    slim = [{k: r.get(k) for k in ("ret_id", "source", "model", "date", "ask", "sections")} for r in reversed(tail)]
+    return {"ok": True, "use_bot": False, "total": len(rows), "count": len(slim), "returns": slim}
+
+
+def cmd_returns_extract(ret_id: str, section: str) -> dict:
+    row = next((r for r in reversed(_read_index()) if r.get("ret_id") == ret_id), None)
+    if row is None:
+        return {"ok": False, "use_bot": False, "reason": "unknown_ret_id", "ret_id": ret_id}
+    path = ROOT / str(row.get("archive"))
+    if not path.exists():
+        return {"ok": False, "alert": True, "use_bot": False, "reason": "archive_missing", "path": str(path)}
+    res = _ret_lint(["--action", "extract", "--file", str(path), "--section", section])
+    res["ret_id"] = ret_id
+    res["provenance"] = {k: row.get(k) for k in ("source", "model", "date", "ask")}
+    res["use_bot"] = False
+    return res
+
+
+def cmd_returns(argv: list[str]) -> tuple[dict, int]:
+    sub = argv[0] if argv else ""
+    rest = argv[1:]
+
+    def opt(name: str) -> str | None:
+        if name in rest:
+            i = rest.index(name)
+            if i + 1 < len(rest):
+                return rest[i + 1]
+        return None
+
+    if sub == "ingest" and rest:
+        return cmd_returns_ingest(rest[0], opt("--source"), opt("--model"), opt("--date")), 0
+    if sub == "list":
+        try:
+            limit = int(opt("--limit") or 12)
+        except ValueError:
+            return {"ok": False, "use_bot": False, "reason": "bad_limit"}, 2
+        return cmd_returns_list(limit), 0
+    if sub == "extract" and len(rest) >= 2:
+        return cmd_returns_extract(rest[0], rest[1]), 0
+    if sub == "lint" and rest:
+        p = Path(rest[0])
+        if not p.is_absolute():
+            p = (Path.cwd() / p) if (Path.cwd() / p).exists() else (ROOT / p)
+        res = _ret_lint(["--action", "check", "--file", str(p.resolve())])
+        res["use_bot"] = False
+        return res, 0
+    return {"ok": False, "use_bot": False, "reason": "bad_returns_usage",
+            "usage": ["returns ingest <path> [--source ID] [--model LABEL] [--date YYYY-MM-DD]",
+                      "returns list [--limit N]", "returns extract <ret-id> <section-id>", "returns lint <path>"]}, 2
+
+
 def main(argv: list[str]) -> int:
     help_obj = {
         "ok": True,
@@ -575,6 +753,7 @@ def main(argv: list[str]) -> int:
             "sources", "list", "inbox", "next",
             "run <id>", "manifest <id>", "action <id> <name> [worker flags...]",
             "last-run [--min-days N] [--max-span-days N]", "ingest <path> [--source <id>] [--overwrite]", "route <text>",
+            "returns ingest|list|extract|lint ...",
         ],
         "rule": "Bots: never read worker source. inbox/route first. action for one slice. quiet if inbox.quiet.",
     }
@@ -585,6 +764,10 @@ def main(argv: list[str]) -> int:
     if cmd == "sources":
         emit(load_sources())
         return 0
+    if cmd == "returns":
+        obj, code = cmd_returns(argv[2:])
+        emit(obj)
+        return code
     cfg = load_tasks()
     last = load_last()
     if cmd == "list":

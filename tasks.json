@@ -374,6 +374,36 @@
         "ok"
       ],
       "notes": "shipped in lib/"
+    },
+    {
+      "id": "ret-lint",
+      "title": "Return Contract Linter (non-code returns)",
+      "priority": 87,
+      "kind": "recorded",
+      "enabled": true,
+      "source": "local",
+      "keywords": [
+        "return",
+        "returns",
+        "ingest",
+        "section",
+        "extract",
+        "external",
+        "provenance"
+      ],
+      "local": {
+        "script": "lib/ret-lint.py",
+        "default_action": "collect",
+        "source": "local"
+      },
+      "bot_when": [
+        "fail",
+        "alert"
+      ],
+      "bot_never": [
+        "ok"
+      ],
+      "notes": "shipped in lib/ (0.3.0)"
     }
   ]
 }

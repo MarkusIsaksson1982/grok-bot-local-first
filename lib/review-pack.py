@@ -17,8 +17,8 @@ MANIFEST = {
     "priority": 93,
     "keywords": ["progressive", "evidence", "review", "pack"],
     "default_action": "d1",
-    "verified_grok_bot": "0.61.0",
-    "verified_at": "2026-09-27",
+    "verified_grok_bot": "0.58.0",
+    "verified_at": "2026-10-02",
     "actions": [
         {"name": "d1", "use_bot": False, "summary": "Minimal index of sibling worker manifests"},
         {"name": "d2", "use_bot": False, "summary": "Compact default-action summaries (skip meta executors)"},

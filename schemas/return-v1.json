@@ -1,0 +1,13 @@
+{
+  "id": "return-v1",
+  "version": 1,
+  "note": "Contract for non-code returns from external models or workers. Checked by lib/ret-lint.py. See prompts/common.md.",
+  "magic": "# RETURN v1",
+  "header_keys": ["source", "model", "date", "ask", "audience", "sections", "budget"],
+  "provenance_keys": ["source", "model", "date"],
+  "section_heading": "^## \\[([A-Za-z][A-Za-z0-9_.-]{0,31})\\](?:[ \\t]+(.*))?$",
+  "audience": ["common", "bot", "agent"],
+  "default_budget": 200,
+  "max_budget": 400,
+  "extract_cap_lines": 200
+}

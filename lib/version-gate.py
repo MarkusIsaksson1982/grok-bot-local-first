@@ -15,7 +15,7 @@ import sys
 from datetime import datetime, timezone
 from typing import Any
 
-CURRENT_FALLBACK = "0.61.0"
+CURRENT_FALLBACK = "0.58.0"
 MANIFEST = {
     "ok": True,
     "id": "version-gate",
@@ -25,8 +25,8 @@ MANIFEST = {
     "priority": 50,
     "keywords": ["version", "stamp", "verified_grok_bot", "iterate", "freshness", "archive"],
     "default_action": "check",
-    "verified_grok_bot": "0.61.0",
-    "verified_at": "2026-09-27",
+    "verified_grok_bot": "0.58.0",
+    "verified_at": "2026-10-02",
     "actions": [
         {"name": "scan", "use_bot": False, "summary": "List lib workers and stamps"},
         {"name": "check", "use_bot": False, "summary": "Flag missing/outdated stamps"},

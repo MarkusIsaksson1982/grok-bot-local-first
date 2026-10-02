@@ -6,8 +6,8 @@ import json
 import sys
 
 MANIFEST = {
-    "verified_at": "2026-09-27",
-    "verified_grok_bot": "0.61.0",
+    "verified_at": "2026-10-02",
+    "verified_grok_bot": "0.58.0",
     "ok": True,
     "id": "worker-template",
     "title": "Reference worker (replace)",
@@ -47,7 +47,7 @@ ACTIONS = {"collect": action_collect, "pack": action_pack}
 
 def main(argv: list[str]) -> int:
     if len(argv) < 2:
-        return emit({"ok": False, "reason": "no_flags", "hint": "--manifest"}, 2)
+        return emit({"ok": False, "alert": False, "reason": "no_flags", "hint": "--manifest"}, 2)
     if argv[1] == "--manifest":
         return emit(MANIFEST)
     if argv[1] == "--list-actions":

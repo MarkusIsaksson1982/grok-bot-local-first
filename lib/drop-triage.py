@@ -22,7 +22,7 @@ import tempfile
 import time
 from typing import Any
 
-CURRENT_FALLBACK = "0.61.0"
+CURRENT_FALLBACK = "0.58.0"
 LIST_CAP = 5
 ARCHIVE_LIST_CAP = 2
 SKIP_DIRS = frozenset({
@@ -79,8 +79,8 @@ MANIFEST = {
         "max_transfer_eth": 0,
         "secrets": "env_path_only",
     },
-    "verified_grok_bot": "0.61.0",
-    "verified_at": "2026-09-27",
+    "verified_grok_bot": "0.58.0",
+    "verified_at": "2026-10-02",
     "actions": [
         {
             "name": "d1",
@@ -709,7 +709,7 @@ def proposed_writes(cls: dict[str, Any], cap: int = 12) -> dict[str, Any]:
         if flags.get("needs_asset_meta") or asset_alert_of(flags):
             add(
                 "stop",
-                ["python", "grokkit.py", "action", "drop-triage", "pack"],
+                [sys.executable, "grokkit.py", "action", "drop-triage", "pack"],
                 "asset-name hit means stop; integrate only after flags quiet",
             )
             continue
@@ -717,12 +717,12 @@ def proposed_writes(cls: dict[str, Any], cap: int = 12) -> dict[str, Any]:
         src = r.get("source") or "other"
         add(
             "ingest",
-            ["python", "grokkit.py", "ingest", rel, "--source", src],
+            [sys.executable, "grokkit.py", "ingest", rel, "--source", src],
             "not a source-id refresh; ingest forces enabled: true",
         )
     add(
         "validate",
-        ["python", "grokkit.py", "action", "audit-harness", "validate"],
+        [sys.executable, "grokkit.py", "action", "audit-harness", "validate"],
         "gate only; this JSON does not run it",
     )
     ids = cls.get("stamp_ids") or cls.get("ingest_ids") or []
@@ -730,7 +730,7 @@ def proposed_writes(cls: dict[str, Any], cap: int = 12) -> dict[str, Any]:
         add(
             "stamp",
             [
-                "python",
+                sys.executable,
                 "grokkit.py",
                 "action",
                 "version-gate",
@@ -742,7 +742,7 @@ def proposed_writes(cls: dict[str, Any], cap: int = 12) -> dict[str, Any]:
         )
     add(
         "check",
-        ["python", "grokkit.py", "action", "version-gate", "check"],
+        [sys.executable, "grokkit.py", "action", "version-gate", "check"],
         "read-only check; stamp only after a promote signature",
     )
     return {

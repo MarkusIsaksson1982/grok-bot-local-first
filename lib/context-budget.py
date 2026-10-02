@@ -16,8 +16,8 @@ MANIFEST = {
     "priority": 85,
     "keywords": ["context", "budget", "triage", "tokens"],
     "default_action": "collect",
-    "verified_grok_bot": "0.61.0",
-    "verified_at": "2026-09-27",
+    "verified_grok_bot": "0.58.0",
+    "verified_at": "2026-10-02",
     "actions": [
         {"name": "collect", "use_bot": False, "summary": "Total size + rough token estimate of candidates"},
         {"name": "select", "use_bot": False, "summary": "High-value subset that fits under budget"},

@@ -13,6 +13,7 @@ Contract: `python worker.py --manifest`, `--list-actions`, `--action NAME`.
 | `decision-gate` | 85 | `gate` | gate, schema, scores, signals | Threshold/escalation gate: whether the bot should engage at all |
 | `drop-triage` | 95 | `d1` | d1, d2, pack, review-pack | Drop Folder Triage Meta-Worker |
 | `freshness-gate` | 55 | `check` | ages, archive-age-check, cadence-stub, check, checksum-dupe-stub, lib-scan-stub, schema | Timestamp / staleness detector for watched inputs |
+| `ret-lint` | 87 | `collect` | collect, check, extract, pack | Return Contract Linter (non-code returns) |
 | `review-pack` | 93 | `d1` | d1, d2, pack | Progressive Evidence Pack Builder |
 | `schema-guard` | 90 | `collect` | collect, violations, pack | Local Schema / Contract Guard |
 | `secrets-scan` | 98 | `collect` | collect, locate, pack | Secret Pattern Scanner |
