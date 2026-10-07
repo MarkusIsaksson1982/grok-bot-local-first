@@ -23,7 +23,7 @@ Grok Bot turns are expensive. Scripts are cheap. Deterministic work stays in `li
 
 ## Point a new bot here
 
-Copy this folder onto the machine that will run the bot, then follow `references/setup.md`. That note creates `state/` and `drop/`, explains the `current_grok_bot` stamp (`0.58.0` Linux-verified), and describes optional library sections. Platform setup scripts are in `adapters/linux/` and `adapters/windows/`. The first bot from this kit on a machine can also use `references/first-probe.md`. Later bots skip that.
+Copy this folder onto the machine that will run the bot, then follow `references/setup.md`. That note creates `state/` and `drop/`, explains the `current_grok_bot` stamp (`0.58.0` Linux-verified), and describes optional library sections. Platform setup scripts are in `adapters/linux/` and `adapters/windows/`. The first bot from this kit on a machine can also use `references/first-probe.md`. Later bots skip that. For unattended or scheduled runs, read `references/operating-patterns.md` (Build effort ladder, auth probe before every poll, credential lifetime, defer rules).
 
 Suggested description:
 
