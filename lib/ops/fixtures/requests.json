@@ -1,0 +1,10 @@
+[
+ {"source": "chat", "external_id": "c1", "requester": "alex@company.example", "subject": "Invoice from Paperclip for October", "body": "Please pay the attached invoice.", "amount": 12400, "currency": "SEK", "vendor": "Paperclip Office Supplies", "created_at": "2026-10-10T09:00:00"},
+ {"source": "chat", "external_id": "c1", "requester": "alex@company.example", "subject": "Invoice from Paperclip for October", "body": "Please pay the attached invoice.", "amount": 12400, "currency": "SEK", "vendor": "Paperclip Office Supplies", "created_at": "2026-10-10T09:00:00"},
+ {"source": "email", "external_id": "m7", "requester": "alex@company.example", "subject": "invoice from PAPERCLIP for october", "body": "Resending in case you missed it.", "amount": 12400, "currency": "SEK", "vendor": "Paperclip Office Supplies", "created_at": "2026-10-11T08:00:00"},
+ {"source": "tracker", "external_id": "t3", "requester": "robin@company.example", "subject": "NDA with a translation agency", "body": "Need an NDA before we share the launch copy.", "vendor": "Lingua Translation Oy", "created_at": "2026-10-13T10:00:00"},
+ {"source": "chat", "external_id": "c9", "requester": "kim@company.example", "subject": "Need a seat in the design tool", "body": "Starting on the new onboarding flow tomorrow.", "created_at": "2026-10-14T07:00:00"},
+ {"source": "email", "external_id": "m8", "requester": "unknown@partner.example", "subject": "Quick question", "body": "Our team was billed twice for the hosting plan this month, can someone sort out the extra charge?", "amount": 3100, "currency": "EUR", "vendor": "billing@nimbus-hosting.example", "created_at": "2026-10-14T06:00:00"},
+ {"source": "tracker", "external_id": "t4", "requester": "robin@company.example", "subject": "Customer wants to change liability wording", "body": "A customer asks if clause 9 can cap liability at 12 months of fees.", "created_at": "2026-10-12T12:00:00"},
+ {"source": "chat", "external_id": "c10", "requester": "kim@company.example", "subject": "Weekly sync notes", "body": "Can we move the ops sync to Thursdays and set up the shared doc?", "created_at": "2026-10-14T08:00:00"}
+]

@@ -12,6 +12,7 @@ Contract: `python worker.py --manifest`, `--list-actions`, `--action NAME`.
 | `context-budget` | 85 | `collect` | collect, select, pack | Context Budget Estimator |
 | `decision-gate` | 85 | `gate` | gate, schema, scores, signals | Threshold/escalation gate: whether the bot should engage at all |
 | `drop-triage` | 95 | `d1` | d1, d2, pack, review-pack | Drop Folder Triage Meta-Worker |
+| `ops-pack` (lib/ops/) | 70 | `status` | intake, pack, classify-apply, approve, dq, status, runbook | Rules-first Finance/Legal/BizOps routing, approval gate, SQL data-quality |
 | `freshness-gate` | 55 | `check` | ages, archive-age-check, cadence-stub, check, checksum-dupe-stub, lib-scan-stub, schema | Timestamp / staleness detector for watched inputs |
 | `ret-lint` | 87 | `collect` | collect, check, extract, pack | Return Contract Linter (non-code returns) |
 | `review-pack` | 93 | `d1` | d1, d2, pack | Progressive Evidence Pack Builder |

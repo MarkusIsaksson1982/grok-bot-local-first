@@ -1,0 +1,13 @@
+{"vendors": [
+ {"name": "Paperclip Office Supplies AB", "domain": "paperclip-office.example", "org_no": "556000-0001", "owner": "finance-ap", "updated_at": "2026-05-01"},
+ {"name": "PAPERCLIP Office Supplies", "domain": "paperclip-office.example", "org_no": "", "owner": "finance-ap", "updated_at": "2026-02-01"},
+ {"name": "Nimbus Hosting Ltd", "domain": "nimbus-hosting.example", "org_no": "GB-0000002", "owner": "bizops-systems", "updated_at": "2026-09-20"},
+ {"name": "Clause & Co Legal Services", "domain": "clause-legal.example", "org_no": "556000-0003", "owner": null, "updated_at": "2024-06-01"},
+ {"name": "Lingua Translation Oy", "domain": "lingua-translate.example", "org_no": "FI-0000004", "owner": "bizops-vendors", "updated_at": null}
+],
+"people": [
+ {"email": "alex@company.example", "name": "Alex (fictional)", "team": "sales", "manager": "sam@company.example"},
+ {"email": "robin@company.example", "name": "Robin (fictional)", "team": "marketing", "manager": "sam@company.example"},
+ {"email": "kim@company.example", "name": "Kim (fictional)", "team": "engineering", "manager": "lee@company.example"},
+ {"email": "sam@company.example", "name": "Sam (fictional)", "team": "finance", "manager": null}
+]}

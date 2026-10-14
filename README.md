@@ -36,3 +36,14 @@ MIT. See `LICENSE`.
 An Agensi marketplace edition of this kit is at https://www.agensi.io/skills/grok-bot-local-first-v0-1-0
 
 What that marketplace is, and whether it is useful here, is left to the person running the bot. The optional download step is in `references/setup.md`.
+
+## Ops pack (`lib/ops/`)
+
+`lib/ops/ops-pack.py` routes Finance, Legal and BizOps requests rules-first: ingest with de-duplication, SQLite enrichment
+(requester team, vendor by normalised name or email domain), keyword rules for team/owner/SLA, and a human approval gate for
+money (finance approver) and contracts (legal/finance approver). The bot is asked for one thing only: `--action pack` lists
+free-text requests no rule matched, with the prompt and JSON schema; the bot writes its answers to a file and
+`--action classify-apply --answers FILE` accepts each answer only if it passes the schema and the confidence bar. Approval status is
+recomputed from the request, never taken from the bot. `--action dq` runs seven SQL data-quality checks nightly.
+Runbook: `lib/ops/RUNBOOK.md`. Data lives in `state/ops/ops.db`. Tests: `tests/test_ops_pack.py`.
+The same core, with pluggable model backends and an evaluation across models, is the standalone repo `ops-pack-demo`.
