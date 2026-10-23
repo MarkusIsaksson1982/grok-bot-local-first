@@ -27,6 +27,28 @@ python3 grokkit.py list          # Windows: python grokkit.py list
 python3 -m unittest discover -s tests
 ```
 
+## Enablement kit (`lib/enablement/`)
+
+`lib/enablement/enablement-kit.py` helps roll out AI assistants, coding agents, Agent Skills and MCP connectors inside an
+organisation. It does the counting so people can do the teaching:
+
+- `--action skill-lint` checks a shared library of Agent Skills (`<skill>/SKILL.md`) for portability across agents: frontmatter,
+  lowercase hyphenated `name` matching the folder, a `description` that says when to use the skill, referenced files present,
+  no personal paths, no credentials.
+- `--action adoption` reads a usage export (week, user, function, tool, sessions, cost) and a headcount file and reports weekly active
+  users, adoption rate, share of power users and a 0-4 maturity level per function, cost per active user, functions below target and
+  functions whose spend is out of line with their usage.
+- `--action intake` screens proposed AI tools and MCP connectors with plain rules (data class, personal data, write scopes, tool
+  allowlist, human verification, vendor region) into fast-track, forum review (Tech and/or Legal) or reject, and orders the agenda.
+- `--action pack` is the only bot step: functions below target and the top agenda items, for wording next steps and forum notes.
+- `lib/enablement/ts/src/skill-router.ts` (strict TypeScript, no dependencies) selects which Agent Skills / MCP tools to load for a
+  request within a cost budget and packs retrieved chunks into a context budget; `lib/enablement/ARCHITECTURE.md` shows how
+  retrieval, skills, MCP connectors, verification and human approval fit together.
+
+Playbook (rollout waves, standards, a three-level output verification protocol, KPIs, governance): `lib/enablement/PLAYBOOK.md`.
+Hands-on 90-minute workshops for development teams: `lib/enablement/workshops/` (prompting and context, Agent Skills, AI in testing
+and review; W1 also in Swedish). Synthetic fixtures in `lib/enablement/fixtures/`. Tests: `tests/test_enablement.py`.
+
 ## License
 
 MIT. See `LICENSE`.

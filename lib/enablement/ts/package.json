@@ -1,0 +1,2 @@
+{ "type": "module", "private": true, "scripts": { "build": "tsc -p .", "test": "tsc -p . && node --test dist/test/" },
+  "devDependencies": { "typescript": "^5.9.3", "@types/node": "^20.19.43" } }

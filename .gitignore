@@ -2,3 +2,5 @@ __pycache__/
 *.pyc
 state/
 drop/
+node_modules/
+dist/

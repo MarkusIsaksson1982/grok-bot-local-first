@@ -1,0 +1,7 @@
+[
+ {"id": "P-101", "title": "Meeting-notes summariser in the chat tool", "type": "tool", "data_class": "internal", "personal_data": false, "scopes": ["read"], "vendor_region": "EU", "external_output": false, "human_review": true},
+ {"id": "P-102", "title": "MCP connector: ticket system (read + comment)", "type": "mcp_connector", "data_class": "confidential", "personal_data": true, "scopes": ["read", "write"], "allowlisted_tools": ["search_tickets", "add_comment"], "vendor_region": "EU", "external_output": false, "human_review": true},
+ {"id": "P-103", "title": "Browser extension that rewrites customer emails", "type": "tool", "data_class": "confidential", "personal_data": true, "scopes": ["read"], "vendor_region": "US", "external_output": true, "human_review": false},
+ {"id": "P-104", "title": "Upload payroll exports to a hosted chatbot", "type": "tool", "data_class": "restricted", "personal_data": true, "scopes": ["read"], "vendor_region": "US", "external_output": false, "human_review": true},
+ {"id": "P-105", "title": "MCP connector: public weather data", "type": "mcp_connector", "data_class": "public", "personal_data": false, "scopes": ["read"], "vendor_region": "SE", "external_output": false, "human_review": true}
+]

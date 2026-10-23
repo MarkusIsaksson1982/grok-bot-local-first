@@ -21,3 +21,4 @@ Contract: `python worker.py --manifest`, `--list-actions`, `--action NAME`.
 | `version-gate` | 50 | `check` | scan, check, stamp, pack, archive-diff | Compare lib worker verified_grok_bot stamps to current |
 | `worker-index` | 92 | `collect` | collect, diff, pack | Sibling Worker Manifest Index |
 | `worker-lint` | 88 | `collect` | collect, violations, pack | Worker Contract Linter |
+| `enablement-kit` (lib/enablement/) | 72 | `skill-lint` | skill-lint, adoption, intake, pack | AI adoption kit: portable skill lint, adoption KPIs, governance intake |

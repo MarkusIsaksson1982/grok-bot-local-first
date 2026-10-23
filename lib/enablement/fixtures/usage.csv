@@ -1,0 +1,85 @@
+week,user,function,tool,sessions,cost_usd
+2026-W41,cu00,Customer Service,assistant,2,0.19
+2026-W41,cu01,Customer Service,assistant,6,0.65
+2026-W41,cu02,Customer Service,assistant,3,0.39
+2026-W41,cu03,Customer Service,assistant,2,0.25
+2026-W41,cu04,Customer Service,assistant,1,0.1
+2026-W41,cu05,Customer Service,assistant,4,0.43
+2026-W41,cu06,Customer Service,assistant,1,0.12
+2026-W41,cu07,Customer Service,assistant,12,1.28
+2026-W41,en00,Engineering,coding-agent,20,2.19
+2026-W41,en01,Engineering,coding-agent,4,0.53
+2026-W41,en02,Engineering,coding-agent,8,1.04
+2026-W41,en03,Engineering,coding-agent,12,1.31
+2026-W41,en04,Engineering,coding-agent,8,1.14
+2026-W41,en05,Engineering,coding-agent,12,1.21
+2026-W41,en06,Engineering,coding-agent,15,1.51
+2026-W41,en07,Engineering,coding-agent,12,1.5
+2026-W41,en08,Engineering,coding-agent,4,0.52
+2026-W41,en09,Engineering,coding-agent,20,2.04
+2026-W41,en10,Engineering,coding-agent,15,1.5
+2026-W41,en11,Engineering,coding-agent,12,1.63
+2026-W41,en12,Engineering,coding-agent,20,2.77
+2026-W41,en13,Engineering,coding-agent,12,1.48
+2026-W41,en14,Engineering,coding-agent,4,0.39
+2026-W41,fi00,Finance,assistant,4,0.53
+2026-W41,fi01,Finance,assistant,2,0.27
+2026-W41,fi02,Finance,assistant,2,0.23
+2026-W41,fi03,Finance,assistant,15,1.9
+2026-W41,hr00,HR,assistant,8,0.83
+2026-W41,hr01,HR,assistant,8,0.85
+2026-W41,ma00,Marketing,assistant,6,5.84
+2026-W41,ma01,Marketing,assistant,2,1.88
+2026-W41,ma02,Marketing,assistant,3,2.74
+2026-W41,ma03,Marketing,assistant,4,3.12
+2026-W41,ma04,Marketing,assistant,12,9.81
+2026-W41,ma05,Marketing,assistant,4,3.87
+2026-W42,cu00,Customer Service,assistant,1,0.11
+2026-W42,cu01,Customer Service,assistant,1,0.13
+2026-W42,cu02,Customer Service,assistant,12,1.31
+2026-W42,cu03,Customer Service,assistant,4,0.56
+2026-W42,cu04,Customer Service,assistant,8,0.85
+2026-W42,cu05,Customer Service,assistant,15,1.72
+2026-W42,cu06,Customer Service,assistant,15,1.54
+2026-W42,cu07,Customer Service,assistant,3,0.32
+2026-W42,cu08,Customer Service,assistant,6,0.79
+2026-W42,cu09,Customer Service,assistant,12,1.67
+2026-W42,cu10,Customer Service,assistant,12,1.36
+2026-W42,cu11,Customer Service,assistant,3,0.36
+2026-W42,en00,Engineering,coding-agent,4,0.53
+2026-W42,en01,Engineering,coding-agent,4,0.41
+2026-W42,en02,Engineering,coding-agent,8,1.07
+2026-W42,en03,Engineering,coding-agent,15,1.87
+2026-W42,en04,Engineering,coding-agent,15,1.71
+2026-W42,en05,Engineering,coding-agent,15,1.82
+2026-W42,en06,Engineering,coding-agent,20,2.75
+2026-W42,en07,Engineering,coding-agent,4,0.51
+2026-W42,en08,Engineering,coding-agent,4,0.51
+2026-W42,en09,Engineering,coding-agent,20,2.64
+2026-W42,en10,Engineering,coding-agent,12,1.22
+2026-W42,en11,Engineering,coding-agent,15,1.55
+2026-W42,en12,Engineering,coding-agent,4,0.57
+2026-W42,en13,Engineering,coding-agent,12,1.71
+2026-W42,en14,Engineering,coding-agent,8,0.96
+2026-W42,en15,Engineering,coding-agent,4,0.55
+2026-W42,en16,Engineering,coding-agent,12,1.64
+2026-W42,en17,Engineering,coding-agent,20,2.5
+2026-W42,en18,Engineering,coding-agent,8,0.91
+2026-W42,en19,Engineering,coding-agent,8,0.98
+2026-W42,en20,Engineering,coding-agent,20,2.8
+2026-W42,fi00,Finance,assistant,8,0.96
+2026-W42,fi01,Finance,assistant,2,0.28
+2026-W42,fi02,Finance,assistant,6,0.64
+2026-W42,fi03,Finance,assistant,4,0.55
+2026-W42,fi04,Finance,assistant,2,0.2
+2026-W42,hr00,HR,assistant,15,2.03
+2026-W42,hr01,HR,assistant,3,0.31
+2026-W42,ma00,Marketing,assistant,15,15.91
+2026-W42,ma01,Marketing,assistant,3,2.45
+2026-W42,ma02,Marketing,assistant,12,12.81
+2026-W42,ma03,Marketing,assistant,4,3.91
+2026-W42,ma04,Marketing,assistant,12,12.94
+2026-W42,ma05,Marketing,assistant,8,7.02
+2026-W42,ma06,Marketing,assistant,15,11.45
+2026-W42,ma07,Marketing,assistant,4,2.97
+2026-W42,ma08,Marketing,assistant,1,0.93
