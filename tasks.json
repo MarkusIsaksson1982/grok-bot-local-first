@@ -153,6 +153,71 @@
       "notes": "shipped in lib/"
     },
     {
+      "id": "ops-pack",
+      "title": "Rules-first Finance/Legal/BizOps request routing, approval gate, SQL data-quality",
+      "priority": 70,
+      "kind": "recorded",
+      "enabled": true,
+      "source": "grok-bot",
+      "keywords": [
+        "ops",
+        "finance",
+        "legal",
+        "bizops",
+        "routing",
+        "approval",
+        "data-quality",
+        "sql",
+        "invoice",
+        "contract"
+      ],
+      "local": {
+        "script": "lib/ops/ops-pack.py",
+        "default_action": "status",
+        "source": "grok-bot"
+      },
+      "bot_when": [
+        "fail",
+        "alert"
+      ],
+      "bot_never": [
+        "ok"
+      ],
+      "notes": "shipped in lib/ops/"
+    },
+    {
+      "id": "enablement-kit",
+      "title": "AI adoption kit: portable skill lint, adoption KPIs, governance intake screening",
+      "priority": 72,
+      "kind": "recorded",
+      "enabled": true,
+      "source": "grok-bot",
+      "keywords": [
+        "enablement",
+        "adoption",
+        "skills",
+        "skill.md",
+        "mcp",
+        "governance",
+        "kpi",
+        "training",
+        "rollout"
+      ],
+      "local": {
+        "script": "lib/enablement/enablement-kit.py",
+        "default_action": "skill-lint",
+        "source": "grok-bot"
+      },
+      "bot_when": [
+        "fail",
+        "alert"
+      ],
+      "bot_never": [
+        "ok"
+      ],
+      "notes": "shipped in lib/enablement/"
+    },
+    {
       "id": "context-budget",
       "title": "Context Budget Estimator",
       "priority": 85,
