@@ -7,3 +7,6 @@ dist/
 
 # Local host-label map (see hosts.json.example)
 hosts.json
+
+# Local npm lockfile from TypeScript enablement experiments
+lib/enablement/ts/package-lock.json
