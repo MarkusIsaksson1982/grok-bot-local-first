@@ -347,20 +347,52 @@ def cmd_next(cfg: dict, last: dict) -> dict:
     }
 
 
-def tokenize(text: str) -> set[str]:
+def token_list(text: str) -> list[str]:
     raw = "".join(ch.lower() if ch.isalnum() else " " for ch in text)
-    return {p for p in raw.split() if p}
+    return [p for p in raw.split() if p]
+
+
+def tokenize(text: str) -> set[str]:
+    return set(token_list(text))
+
+
+def _contains_phrase(seq: list[str], phrase: list[str]) -> bool:
+    if not phrase or len(phrase) > len(seq):
+        return False
+    n = len(phrase)
+    return any(seq[i:i + n] == phrase for i in range(len(seq) - n + 1))
+
+
+def keyword_hits(keys: list[str], seq: list[str], tokens: set[str]) -> list[str]:
+    """Whole-keyword / whole-token matches only. No substring containment.
+
+    A single-token keyword or id hits when that token is present. A multi-token
+    key (for example 'decision-gate' or 'verified_grok_bot') hits when those
+    tokens appear as a consecutive phrase in the request.
+    """
+    hits: list[str] = []
+    for k in keys:
+        parts = token_list(k)
+        if not parts:
+            continue
+        if len(parts) == 1:
+            if parts[0] in tokens:
+                hits.append(k)
+        elif _contains_phrase(seq, parts):
+            hits.append(k)
+    return hits
 
 
 def cmd_route(cfg: dict, text: str) -> dict:
-    tokens = tokenize(text)
+    seq = token_list(text)
+    tokens = set(seq)
     scored = []
     for task in sorted_tasks(cfg):
         if task.get("kind") == "live":
             continue
         keys = [task.get("id", "")] + list(task.get("keywords") or [])
         keys = [k.lower() for k in keys if k]
-        hits = [k for k in keys if k in tokens or any(k in tok or tok in k for tok in tokens)]
+        hits = keyword_hits(keys, seq, tokens)
         if hits:
             scored.append((len(hits), -task.get("priority", 100), task, hits))
     if not scored:

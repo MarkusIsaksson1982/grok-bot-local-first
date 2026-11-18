@@ -8,6 +8,14 @@ export function tokenize(text: string): string[] {
   return text.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter((t) => t.length >= 2);
 }
 
+export function validCard(card: SkillCard): boolean {
+  if (!card || typeof card.name !== 'string' || card.name.trim() === '') return false;
+  if (card.kind !== 'skill' && card.kind !== 'mcp_tool') return false;
+  if (typeof card.costUnits !== 'number' || !Number.isFinite(card.costUnits) || card.costUnits < 0) return false;
+  if (!Array.isArray(card.triggers)) return false;
+  return true;
+}
+
 export function scoreCard(query: string, card: SkillCard): number {
   const trig = new Set(tokenize(card.triggers.join(' ')));
   const body = new Set(tokenize(card.name + ' ' + card.description));
@@ -17,7 +25,7 @@ export function scoreCard(query: string, card: SkillCard): number {
 }
 
 export function selectCards(query: string, cards: SkillCard[], k: number, maxCostUnits: number): SkillCard[] {
-  const ranked = cards.map((c) => ({ c, s: scoreCard(query, c) })).filter((x) => x.s > 0)
+  const ranked = cards.filter(validCard).map((c) => ({ c, s: scoreCard(query, c) })).filter((x) => x.s > 0)
     .sort((a, b) => b.s - a.s || a.c.costUnits - b.c.costUnits || a.c.name.localeCompare(b.c.name));
   const out: SkillCard[] = []; let cost = 0;
   for (const { c } of ranked) {

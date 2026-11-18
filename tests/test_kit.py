@@ -110,6 +110,22 @@ class TestCore(KitCase):
         self.assertEqual(res["matched"], "ret-lint")
         self.assertEqual(res["run"][0], sys.executable)
 
+    def test_route_matches_whole_keywords_not_substrings(self) -> None:
+        gate = self.kit("route", "gate")
+        self.assertEqual(gate["matched"], "decision-gate")
+        version = self.kit("route", "version-gate")
+        self.assertEqual(version["matched"], "version-gate")
+        phrase = self.kit("route", "please run version gate")
+        self.assertEqual(phrase["matched"], "version-gate")
+        miss = self.kit("route", "gat")
+        self.assertTrue(miss.get("use_bot"))
+        self.assertEqual(miss.get("reason"), "live_unrouted")
+        self.assertIsNone(miss.get("matched"))
+        # A token that is only a fragment of an id must not pin a local worker.
+        # 'decision' is not a registered keyword of decision-gate.
+        only_decision = self.kit("route", "decision")
+        self.assertEqual(only_decision.get("reason"), "live_unrouted")
+
 
 class TestReturns(KitCase):
     def write(self, name: str, text: str) -> str:

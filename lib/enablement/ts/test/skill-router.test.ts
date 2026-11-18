@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { tokenize, scoreCard, selectCards, packContext, type SkillCard, type Chunk } from '../src/skill-router.js';
+import { tokenize, scoreCard, selectCards, packContext, validCard, type SkillCard, type Chunk } from '../src/skill-router.js';
 
 const card = (name: string, description: string, triggers: string[], costUnits = 1, kind: 'skill' | 'mcp_tool' = 'skill'): SkillCard =>
   ({ name, description, triggers, kind, costUnits });
@@ -42,4 +42,22 @@ test('packContext: score order, id tiebreak, budget skip, distinct sources', () 
   assert.deepEqual(all.ids, ['c2', 'c3', 'c1']);
   assert.deepEqual(all.sources, ['policy.pdf', 'faq.md']);
   assert.deepEqual(packContext('nothing', chunks, 1000), { ids: [], usedChars: 0, sources: [] });
+});
+
+test('validCard and selectCards: skip empty name, bad kind, negative or non-finite cost', () => {
+  const ok = card('ok', 'invoice search', ['invoice'], 1);
+  const empty = { name: '  ', description: 'invoice', triggers: ['invoice'], kind: 'skill' as const, costUnits: 1 };
+  const badKind = { name: 'bad-kind', description: 'invoice', triggers: ['invoice'], kind: 'other' as SkillCard['kind'], costUnits: 1 };
+  const neg = card('neg', 'invoice search', ['invoice'], -5);
+  const inf = card('inf', 'invoice search', ['invoice'], Number.POSITIVE_INFINITY);
+  const nan = card('nan', 'invoice search', ['invoice'], Number.NaN);
+  assert.equal(validCard(ok), true);
+  assert.equal(validCard(empty), false);
+  assert.equal(validCard(neg), false);
+  assert.equal(validCard(inf), false);
+  assert.equal(validCard(nan), false);
+  assert.equal(validCard(badKind), false);
+  assert.deepEqual(selectCards('invoice', [ok, empty, badKind, neg, inf, nan], 10, 100).map((c) => c.name), ['ok']);
+  // A negative cost must not sneak extra cards under a tight budget.
+  assert.deepEqual(selectCards('invoice', [neg, ok], 10, 1).map((c) => c.name), ['ok']);
 });
