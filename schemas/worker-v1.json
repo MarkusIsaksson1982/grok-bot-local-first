@@ -1,0 +1,89 @@
+{
+  "id": "worker-v1",
+  "version": 1,
+  "note": "Contract for grokkit workers. The last non-empty stdout line is one JSON object. Stderr is diagnostics and is not parsed. Python stdlib workers remain the core; runtime and hosts fields are optional. See references/worker_template.py. Optional language runtimes and example workers live under addons/ and are documented in docs/ADDONS.md.",
+  "invocation": [
+    "--manifest",
+    "--list-actions",
+    "--action NAME [flags...]"
+  ],
+  "no_flags": {
+    "must_not_do_work": true,
+    "exit": 2,
+    "json": {
+      "ok": false,
+      "reason": "no_flags",
+      "hint": "--manifest"
+    }
+  },
+  "stdin": "Ignored unless accepts_stdin is true on the manifest (optional, unused by shipped workers).",
+  "exit_codes": {
+    "0": "Worker ran and emitted JSON.",
+    "1": "Action failed; JSON still emitted (ok false, usually alert true).",
+    "2": "Usage or missing flags.",
+    "3": "Reserved for grokkit: host or runtime mismatch; the worker was not started."
+  },
+  "runtimes": [
+    "python",
+    "node",
+    "bash",
+    "go",
+    "exec"
+  ],
+  "runtime_default": "python",
+  "reserved_env": {
+    "GROKKIT_HOST": "Optional user-defined host label (for example box, laptop, or studio). Used for placement. Any short label is accepted.",
+    "GROKKIT_PYTHON": "Optional Python interpreter for python workers. Defaults to the interpreter running grokkit.",
+    "GROKKIT_DEV_ORACLE": "Optional path for a private, out-of-tree dev oracle or extra checks. The kit never imports or runs it, and it is never required at runtime."
+  },
+  "manifest_required": [
+    "ok",
+    "id",
+    "title",
+    "priority",
+    "keywords",
+    "default_action",
+    "actions"
+  ],
+  "action_entry": {
+    "required": [
+      "name",
+      "use_bot",
+      "summary"
+    ]
+  },
+  "action_result_required": [
+    "ok",
+    "alert",
+    "summary",
+    "data",
+    "action"
+  ],
+  "optional_manifest_fields": [
+    "runtime",
+    "hosts",
+    "accepts_stdin",
+    "verified_grok_bot",
+    "verified_at",
+    "source",
+    "origin"
+  ],
+  "hosts": {
+    "class": "any (default), an OS family (linux, darwin, windows, other), or a user-defined host label. OS families are matched against the current OS. Other values are matched against GROKKIT_HOST or hosts.json.",
+    "class_default": "any",
+    "prefer": "Optional soft hint: a user-defined host label, or a list of labels. Never fails a job.",
+    "needs": [
+      "docker",
+      "node",
+      "go",
+      "bash",
+      "opencode",
+      "codex",
+      "grok-build",
+      "vt-x"
+    ],
+    "min_ram_mb": "Skip starting the worker when available RAM is below this. If RAM cannot be measured, do not skip."
+  },
+  "hosts_json": "Optional file hosts.json at the kit root maps a machine hostname to a user-defined label. It is local and is not shipped. See hosts.json.example.",
+  "summary": "Keep summary short and data small. Cap lists and include a total when truncated. Do not print secrets."
+}

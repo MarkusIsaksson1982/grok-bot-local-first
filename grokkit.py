@@ -19,6 +19,8 @@ Usage:
   python grokkit.py returns extract <ret-id> <section-id>
   python grokkit.py returns lint <path>
 
+Worker contract: schemas/worker-v1.json. Python is the default runtime.
+
 On Linux/macOS use python3 if python is not on PATH.
 """
 from __future__ import annotations
@@ -26,6 +28,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import platform
 import shutil
 import subprocess
 import sys
@@ -177,9 +180,180 @@ def parse_json_out(stdout: str) -> dict | None:
         return None
 
 
-def run_script(path: Path, args: list[str]) -> dict:
+# Host labels are user-defined (GROKKIT_HOST or a local hosts.json).
+# OS families are detected separately and may be used as a class constraint.
+OS_FAMILIES = ("linux", "darwin", "windows")
+NEED_CMDS = {
+    "docker": "docker",
+    "node": "node",
+    "go": "go",
+    "bash": "bash",
+    "opencode": "opencode",
+    "codex": "codex",
+    "grok-build": "grok",
+}
+SUFFIX_RUNTIME = {
+    ".py": "python",
+    ".js": "node",
+    ".mjs": "node",
+    ".ts": "node",
+    ".sh": "bash",
+    ".go": "go",
+}
+
+
+def infer_runtime(path: Path, task: dict | None = None, manifest: dict | None = None) -> str:
+    for src in ((task or {}).get("local") or {}, manifest or {}):
+        rt = src.get("runtime")
+        if rt:
+            return str(rt).lower()
+    return SUFFIX_RUNTIME.get(path.suffix.lower(), "python")
+
+
+def launch_command(path: Path, args: list[str], runtime: str) -> list[str] | dict:
+    """Build an argv, or a JSON error if the runtime cannot be started."""
+    rt = (runtime or "python").lower()
+    if rt == "python":
+        py = os.environ.get("GROKKIT_PYTHON") or sys.executable
+        return [py, str(path), *args]
+    if rt == "node":
+        exe = shutil.which("node")
+        if not exe:
+            return {"ok": False, "alert": True, "use_bot": False, "reason": "runtime_unavailable", "runtime": rt}
+        return [exe, str(path), *args]
+    if rt == "bash":
+        exe = shutil.which("bash")
+        if not exe:
+            return {"ok": False, "alert": True, "use_bot": False, "reason": "runtime_unavailable", "runtime": rt}
+        return [exe, str(path), *args]
+    if rt == "go":
+        if path.suffix.lower() == ".go":
+            exe = shutil.which("go")
+            if not exe:
+                return {"ok": False, "alert": True, "use_bot": False, "reason": "runtime_unavailable", "runtime": rt}
+            return [exe, "run", str(path), *args]
+        return [str(path), *args]
+    if rt == "exec":
+        return [str(path), *args]
+    return {"ok": False, "alert": True, "use_bot": False, "reason": "unknown_runtime", "runtime": rt}
+
+
+def os_family() -> str:
+    plat = sys.platform
+    if plat.startswith("win"):
+        return "windows"
+    if plat == "darwin":
+        return "darwin"
+    if plat.startswith("linux"):
+        return "linux"
+    return "other"
+
+
+def _norm_label(value: str) -> str:
+    return value.strip().lower()
+
+
+def current_host() -> str:
+    """Return this machine's user-defined host label, or the OS family."""
+    env = _norm_label(os.environ.get("GROKKIT_HOST") or "")
+    if env:
+        return env
+    mapping_path = ROOT / "hosts.json"
+    if mapping_path.is_file():
+        try:
+            raw = json.loads(mapping_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError, TypeError, ValueError):
+            raw = {}
+        if isinstance(raw, dict):
+            node = platform.node()
+            label = raw.get(node) or raw.get(node.lower())
+            if isinstance(label, str) and _norm_label(label) and not _norm_label(label).startswith("_"):
+                return _norm_label(label)
+    return os_family()
+
+
+def _available_ram_mb() -> int | None:
+    try:
+        for line in Path("/proc/meminfo").read_text().splitlines():
+            if line.startswith("MemAvailable:"):
+                return int(line.split()[1]) // 1024
+    except (OSError, ValueError, IndexError):
+        return None
+    return None
+
+
+def _has_vtx() -> bool:
+    try:
+        text = Path("/proc/cpuinfo").read_text()
+    except OSError:
+        return False
+    return " vmx " in f" {text} " or " svm " in f" {text} "
+
+
+def placement_skip(task: dict, manifest: dict | None = None) -> dict | None:
+    """If this host cannot run the worker, return a skip payload; else None.
+
+    prefer is a hint only and never skips. A mismatch does not warrant a bot turn.
+    """
+    hosts = {}
+    if isinstance((manifest or {}).get("hosts"), dict):
+        hosts.update(manifest["hosts"])
+    local = task.get("local") or {}
+    if isinstance(local.get("hosts"), dict):
+        hosts.update(local["hosts"])
+    if not hosts:
+        return None
+    host = current_host()
+    cls = str(hosts.get("class") or "any").lower()
+    reasons: list[str] = []
+    if cls not in ("", "any"):
+        if cls in OS_FAMILIES or cls == "other":
+            if os_family() != cls:
+                reasons.append("class")
+        elif host != cls:
+            reasons.append("class")
+    needs = [str(n).lower() for n in (hosts.get("needs") or [])]
+    missing: list[str] = []
+    for need in needs:
+        if need == "vt-x":
+            if not _has_vtx():
+                missing.append(need)
+            continue
+        cmd = NEED_CMDS.get(need)
+        if not cmd or not shutil.which(cmd):
+            missing.append(need)
+    if missing:
+        reasons.append("needs")
+    min_ram = hosts.get("min_ram_mb") or 0
+    try:
+        min_ram_i = int(min_ram)
+    except (TypeError, ValueError):
+        min_ram_i = 0
+    available = _available_ram_mb()
+    if min_ram_i > 0 and available is not None and available < min_ram_i:
+        reasons.append("min_ram_mb")
+    if not reasons:
+        return None
+    return {
+        "ok": True,
+        "alert": False,
+        "use_bot": False,
+        "reason": "host_mismatch",
+        "id": task.get("id"),
+        "host": host,
+        "want": {k: hosts.get(k) for k in ("class", "needs", "min_ram_mb") if k in hosts},
+        "missing_needs": missing,
+        "summary": "Skipped: this host does not meet the worker's placement requirements.",
+        "data": {"reasons": reasons, "available_ram_mb": available},
+    }
+
+
+def run_script(path: Path, args: list[str], runtime: str | None = None, task: dict | None = None) -> dict:
+    argv = launch_command(path, args, runtime or infer_runtime(path, task))
+    if isinstance(argv, dict):
+        return argv
     proc = subprocess.run(
-        [sys.executable, str(path), *args],
+        argv,
         cwd=str(ROOT),
         capture_output=True,
         text=True,
@@ -237,7 +411,7 @@ def run_local(task: dict, action: str | None = None, extra: list[str] | None = N
     args = ["--action", name]
     if extra:
         args.extend(extra)
-    result = run_script(path, args)
+    result = run_script(path, args, task=task)
     result.setdefault("action", name)
     return result
 
@@ -291,6 +465,11 @@ def cmd_run(cfg: dict, task_id: str, action: str | None = None, extra: list[str]
     task = find_task(cfg, task_id)
     if task is None:
         return {"ok": False, "alert": True, "use_bot": True, "reason": "unknown_task", "id": task_id}
+    path = task_script(task)
+    man = run_script(path, ["--manifest"], task=task) if path else None
+    skip = placement_skip(task, man if isinstance(man, dict) and man.get("ok") else None)
+    if skip:
+        return skip
     result = run_local(task, action, extra)
     record_result(task, result)
     use, reason = needs_bot(task, result)
@@ -313,7 +492,7 @@ def cmd_manifest(cfg: dict, task_id: str) -> dict:
     path = task_script(task)
     if path is None:
         return {"ok": False, "use_bot": False, "reason": "no_script", "id": task_id}
-    man = run_script(path, ["--manifest"])
+    man = run_script(path, ["--manifest"], task=task)
     man["task_id"] = task_id
     man["script"] = str(path)
     bot_actions = [a.get("name") for a in (man.get("actions") or []) if isinstance(a, dict) and a.get("use_bot")]
@@ -820,7 +999,10 @@ def main(argv: list[str]) -> int:
         action = None
         if len(argv) >= 5 and argv[3] == "--action":
             action = argv[4]
-        emit(cmd_run(cfg, argv[2], action))
+        result = cmd_run(cfg, argv[2], action)
+        emit(result)
+        if result.get("reason") in {"host_mismatch", "runtime_unavailable", "unknown_runtime"}:
+            return 3
         return 0
     if cmd == "manifest":
         if len(argv) < 3:
@@ -832,7 +1014,10 @@ def main(argv: list[str]) -> int:
         if len(argv) < 4:
             emit({"ok": False, "use_bot": False, "reason": "missing_id_or_action"})
             return 2
-        emit(cmd_run(cfg, argv[2], argv[3], argv[4:]))
+        result = cmd_run(cfg, argv[2], argv[3], argv[4:])
+        emit(result)
+        if result.get("reason") in {"host_mismatch", "runtime_unavailable", "unknown_runtime"}:
+            return 3
         return 0
     if cmd == "ingest":
         if len(argv) < 3:

@@ -1,0 +1,4 @@
+{
+  "_comment": "Copy this file to hosts.json (gitignored) and map this machine's hostname to a short label you choose. Labels are yours: box, laptop, studio, or any other name. grokkit ignores keys that start with an underscore. If GROKKIT_HOST is set, it wins over this file.",
+  "my-hostname": "laptop"
+}

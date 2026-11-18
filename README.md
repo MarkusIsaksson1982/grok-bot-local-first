@@ -16,9 +16,20 @@ A worker in `lib/` or in `lib/<section>/` finds this folder by walking up from i
 - `sources.json` holds `current_grok_bot` and the source ids (local, external drafts, web chats, coding agents).
 - `prompts/` holds the common return format and short per-provider notes. `schemas/return-v1.json` is its contract.
 - `adapters/linux/setup.sh` and `adapters/windows/setup.ps1` create `state/` and `drop/` and smoke-check the kit. `adapters/windows/PORTING.md` lists the few platform differences.
-- `tests/` holds a stdlib smoke suite: `python3 -m unittest discover -s tests`.
+- `tests/` holds a stdlib smoke suite: `python3 -m unittest discover -s tests`. Those core tests do not require Node, Go, Docker, or anything under `addons/`.
+- `schemas/worker-v1.json` is the language-neutral worker contract. Python is the default runtime.
+- `addons/` holds optional reference adapters for other common languages and tools. They are not part of the core. See `docs/ADDONS.md`.
+- `hosts.json.example` shows how to map a machine hostname to a label you choose. A local `hosts.json` is gitignored and is not shipped.
 
 `state/` and `drop/` are local. They are gitignored and are not part of the tree until the bot creates them.
+
+## Placement and runtimes
+
+The core kit is stdlib Python plus the worker contract in `schemas/worker-v1.json`. It is meant to run on a Grok Bot Linux box, on one or more of your own computers, or on both.
+
+`GROKKIT_HOST` is an optional label you choose for this machine (for example `box` or `laptop`). A local `hosts.json` can map a hostname to that label; copy `hosts.json.example` and edit it. It is not shipped. A task may set `local.runtime` (`python` is the default; also `node`, `bash`, `go`, `exec`) and `local.hosts` (`class`, `prefer`, `needs`, `min_ram_mb`). `class` may be `any` (the default), an OS family (`linux`, `darwin`, `windows`), or one of your host labels. If this host does not meet a requirement, grokkit prints JSON with `reason: host_mismatch` and does not start the worker or spend a bot turn. `prefer` is a hint only and never skips a job.
+
+Optional language adapters and example workers are add-ons. They are documented in `docs/ADDONS.md` and are not required to use the kit.
 
 ## Check
 

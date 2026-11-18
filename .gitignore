@@ -4,3 +4,6 @@ state/
 drop/
 node_modules/
 dist/
+
+# Local host-label map (see hosts.json.example)
+hosts.json

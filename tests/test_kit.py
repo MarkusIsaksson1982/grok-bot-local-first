@@ -6,6 +6,7 @@ the real tree are never touched.
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -55,9 +56,13 @@ class KitCase(unittest.TestCase):
     def tearDownClass(cls) -> None:
         cls.tmp.cleanup()
 
-    def kit(self, *args: str) -> dict:
+    def kit(self, *args: str, env: dict | None = None) -> dict:
+        e = os.environ.copy()
+        if env:
+            e.update(env)
         p = subprocess.run([sys.executable, "grokkit.py", *args], cwd=self.root,
-                           capture_output=True, text=True, encoding="utf-8", timeout=120)
+                           capture_output=True, text=True, encoding="utf-8", timeout=120,
+                           env=e)
         return last_json(p.stdout)
 
     def worker(self, name: str, *args: str) -> dict:
@@ -125,6 +130,7 @@ class TestCore(KitCase):
         # 'decision' is not a registered keyword of decision-gate.
         only_decision = self.kit("route", "decision")
         self.assertEqual(only_decision.get("reason"), "live_unrouted")
+
 
 
 class TestReturns(KitCase):

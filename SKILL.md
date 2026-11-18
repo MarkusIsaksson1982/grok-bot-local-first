@@ -77,7 +77,7 @@ python worker.py --action NAME
 
 `use_bot: false` means the action is deterministic. `use_bot: true` means a judgment pack. Do not open a pack unless a person or the inbox asked for it.
 
-The reference shape is `references/worker_template.py`. Copy it to a new name under `drop/` when writing a worker. It is not a live task. Stamp `verified_grok_bot` with the same value as `sources.json` `current_grok_bot`.
+The reference shape is `references/worker_template.py`. Copy it to a new name under `drop/` when writing a worker. It is not a live task. Stamp `verified_grok_bot` with the same value as `sources.json` `current_grok_bot`. The contract is `schemas/worker-v1.json`. Python is the default runtime; a worker may set `runtime` to `node`, `bash`, `go`, or `exec`. Optional `hosts` fields tell grokkit to skip the action when this machine does not match (`GROKKIT_HOST` or a local `hosts.json`). Optional reference adapters (bash, Node, Go, Docker) live under `addons/` and are documented in `docs/ADDONS.md`. They are not required.
 
 ## Returns (non-code answers)
 
