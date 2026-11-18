@@ -3,7 +3,8 @@
 
 Offline, read-only, stdlib-only. Answers the pre-flight question "should the
 bot look at this at all?" by scoring cheap local signals against a weighted
-threshold and emitting a single verdict. Purely deterministic (use_bot:false).
+integer threshold and emitting a single verdict. Hard signals escalate
+regardless of weights. Unknown kinds fail the gate. Purely deterministic (use_bot:false).
 
 Paths accept / and \\. Unknown signal kinds and empty matches return a compact
 schema hint so the gate list can be expanded without opening this file.
@@ -46,6 +47,7 @@ BUILTIN_GATES = [
         "kind": "marker_glob",
         "glob": "*BLOCK*,*STUCK*,*FAIL*,*.blocked",
         "weight": 90,
+        "hard": True,
     },
     {
         "name": "stale-tree",
@@ -56,7 +58,7 @@ BUILTIN_GATES = [
         "weight": 30,
     },
 ]
-BUILTIN_THRESHOLD = 50.0
+BUILTIN_THRESHOLD = 50
 
 SIGNAL_KINDS = [
     {
@@ -103,9 +105,24 @@ HINT_TREE = {
     ],
     "notes": (
         "paths are relative to --dir. Globs accept / or \\. "
-        "'..' segments are rejected. Unknown kind is a non-trigger with a hint."
+        "'..' segments are rejected. Unknown kind fails the gate with a hint."
     ),
 }
+
+
+KNOWN_KINDS = {k["kind"] for k in SIGNAL_KINDS}
+
+
+def _is_hard(sig: dict) -> bool:
+    """Hard signals force escalate; weights cannot outvote them.
+
+    Builtin blocked-marker is hard unless the config sets hard to false.
+    """
+    if sig.get("hard") is False:
+        return False
+    if sig.get("hard") is True:
+        return True
+    return str(sig.get("name") or "") == "blocked-marker"
 
 
 def _emit(payload: dict) -> None:
@@ -197,9 +214,11 @@ def _signal(base: Path, sig: dict) -> dict:
         "name": name,
         "kind": kind,
         "weight": weight,
+        "hard": _is_hard(sig) if isinstance(sig, dict) else False,
         "triggered": False,
         "value": 0,
         "note": "",
+        "invalid": False,
     }
 
     if kind == "marker_glob":
@@ -250,6 +269,7 @@ def _signal(base: Path, sig: dict) -> dict:
     else:
         res["note"] = f"unsupported signal kind: {kind!r}"
         res["hint"] = HINT_TREE
+        res["invalid"] = True
     return res
 
 
@@ -260,18 +280,35 @@ def _gates(config: dict) -> list[dict]:
 
 def run_gate(base: Path, config: dict) -> dict:
     gates = _gates(config)
-    threshold = float(config.get("threshold", BUILTIN_THRESHOLD))
+    threshold = int(float(config.get("threshold", BUILTIN_THRESHOLD)))
     results = [_signal(base, s) if isinstance(s, dict) else
                _signal(base, {"kind": "marker_glob", "glob": str(s)}) for s in gates]
+    invalid = [r for r in results if r.get("invalid")]
+    if invalid:
+        kinds = [r.get("kind") for r in invalid]
+        return {
+            "ok": False,
+            "alert": True,
+            "summary": f"unsupported signal kind: {kinds[0]!r}",
+            "data": {
+                "error": "unsupported_signal_kind",
+                "kinds": kinds,
+                "hint": HINT_TREE,
+            },
+            "action": "gate",
+        }
     triggered = [r for r in results if r["triggered"]]
-    score = min(threshold, sum(r["weight"] for r in triggered))
-    verdict = "escalate" if score >= threshold else "hold"
+    hard_names = [r["name"] for r in triggered if r.get("hard")]
+    score = sum(int(r["weight"]) for r in triggered)
+    verdict = "escalate" if hard_names or score >= threshold else "hold"
     names = [r["name"] for r in triggered]
     data = {
         "score": score,
         "threshold": threshold,
         "severity": "high" if verdict == "escalate" else "ok",
         "verdict": verdict,
+        "hard": hard_names[:5],
+        "hard_total": len(hard_names),
         "gates": len(results),
         "triggered_total": len(names),
         "triggered": names[:5],
@@ -279,7 +316,9 @@ def run_gate(base: Path, config: dict) -> dict:
     }
     if any("hint" in r for r in results):
         data["hint"] = HINT_TREE
-    summary = f"score {score:.0f}/{threshold:.0f} -> {verdict}"
+    summary = f"score {score}/{threshold} -> {verdict}"
+    if hard_names:
+        summary += f" (hard: {', '.join(hard_names[:3])})"
     if names:
         summary += f" ({', '.join(names[:3])})"
     return {
@@ -293,7 +332,7 @@ def run_gate(base: Path, config: dict) -> dict:
 
 def run_scores(base: Path, config: dict) -> dict:
     gates = _gates(config)
-    threshold = float(config.get("threshold", BUILTIN_THRESHOLD))
+    threshold = int(float(config.get("threshold", BUILTIN_THRESHOLD)))
     results = [_signal(base, s) if isinstance(s, dict) else
                _signal(base, {"kind": "marker_glob", "glob": str(s)}) for s in gates]
     rows = [
@@ -301,7 +340,9 @@ def run_scores(base: Path, config: dict) -> dict:
             "name": r["name"],
             "kind": r["kind"],
             "weight": r["weight"],
+            "hard": bool(r.get("hard")),
             "triggered": r["triggered"],
+            "invalid": bool(r.get("invalid")),
             "value": r["value"],
         }
         for r in results
